@@ -40,9 +40,10 @@ export async function POST(req: NextRequest) {
     // Return the streaming response
     return new Response(response.body, {
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
+        'Transfer-Encoding': 'chunked',
       },
     });
   } catch (error) {

@@ -41,14 +41,24 @@ export function useChat() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        let serverMessage = 'Failed to send message. Please try again.';
+        try {
+          const data = await response.json();
+          if (typeof data?.error === 'string') serverMessage = data.error;
+        } catch {
+          try {
+            const text = await response.text();
+            if (text) serverMessage = text;
+          } catch {}
+        }
+        throw new Error(serverMessage);
       }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
       if (!reader) {
-        throw new Error('No reader available');
+        throw new Error('No reader available from response body');
       }
 
       const assistantMessage: Message = {
@@ -109,7 +119,7 @@ export function useChat() {
       setState(prev => ({
         ...prev,
         isLoading: false,
-        error: 'Failed to send message. Please try again.',
+        error: error instanceof Error ? error.message : 'Failed to send message. Please try again.',
       }));
     }
   }, [state.messages]);
